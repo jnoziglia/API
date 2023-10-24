@@ -1,7 +1,23 @@
 <script setup>
-    import Pagination from './Pagination.vue'
     import { ref } from 'vue';
+    import { VDataTable } from 'vuetify/labs/VDataTable'
     let allPlanets = [];
+    let headers = [
+          {
+            title: 'Planet',
+            align: 'start',
+            key: 'name',
+          },
+          { title: 'Rotation period', align: 'end', key: 'rotation_period' },
+          { title: 'Orbital period', align: 'end', key: 'orbital_period' },
+          { title: 'Diameter', align: 'end', key: 'diameter' },
+          { title: 'Climate', align: 'end', key: 'climate' },
+          { title: 'Gravity', align: 'end', key: 'gravity' },
+          { title: 'Terrain', align: 'end', key: 'terrain' },
+          { title: 'Surface water', align: 'end', key: 'surface_water' },
+          { title: 'Population', align: 'end', key: 'population' },
+        ]
+    const currentPage = ref(1);
     const planets = ref(null);
     const loading = ref(false);
     const planetCount = ref(0);
@@ -9,59 +25,44 @@
     
     loading.value = true;
 
-    allPlanets = getPlanets('https://swapi.dev/api/planets', []);
-    console.log(allPlanets);
-    loading.value = false;
-    planetCount.value = allPlanets.length;
-    planets.value = allPlanets;
-
-    function getPlanets(url, planetList) {
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.next) {
-                    return getPlanets(data.next, planetList.concat(data.results));
+    //allPlanets = getPlanets('https://swapi.dev/api/planets', []);
+    fetch('https://swapi.dev/api/planets')
+        .then(response => response.json())
+        .then(data => {
+            allPlanets = data;
+            planetCount.value = data.count;
+            let pages = Math.ceil(data.count/resultsPerPage.value);
+            if(pages > 1){
+                let urls = [];
+                for(let i = 2; i <= pages; i++) {
+                    urls.push(`https://swapi.dev/api/planets/?page=${i}`);
                 }
-                else {
-                    return planetList.concat(data.results);
-                }
-            });
-    }
-
-    const sortPlanets = () => {
-        planets.value.results.sort((a, b) => {
-            return a.name.localeCompare(b.name);
+                Promise.all(urls.map(url => fetch(url).then(response => response.json())))
+                    .then(data => {
+                        data.forEach(page => {
+                            allPlanets.results = allPlanets.results.concat(page.results);
+                            planetCount.value = allPlanets.results.length;
+                        });
+                        console.log(allPlanets);
+                        planets.value = allPlanets.results;
+                        loading.value = false;
+                    });
+            }
         });
-    }
-
-    const updateList = (page) => {
-        console.log(page);
-        loading.value = true;
-        fetch(`https://swapi.dev/api/planets/?page=${page}`)
-            .then(response => response.json())
-            .then(data => {
-                planets.value = data;
-                loading.value = false;
-            });
-    }
     </script>
 
     <template>
-        <div>
-            <button role="button" @click="sortPlanets">Sort</button>
-        </div>
         <div v-if="loading">
-            Loading...
+            <v-progress-linear indeterminate></v-progress-linear>
         </div>
-        <div v-else-if="planets">
-            <h5>Planets</h5>
-            <ul class="mb-0">
-                <li v-for="planet in planets" :key="planet.name">{{planet.name}}</li>
-            </ul>
-        </div>
-        <div>
-            <Pagination v-if="allPlanets.count" :total="Math.ceil(allPlanets.count/resultsPerPage)" :resultsPerPage="resultsPerPage" @updateCurrent="updateList" />
-        </div>
-        <div>Page</div>
+        <v-data-table
+            v-else-if="planets"
+            v-model:items-per-page="resultsPerPage"
+            :headers="headers"
+            :items="planets"
+            item-key="name"
+            class="elevation-1"
+            density="compact"
+        ></v-data-table>
     </template>
 
