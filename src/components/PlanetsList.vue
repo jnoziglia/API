@@ -19,11 +19,9 @@
         ]
     const currentPage = ref(1);
     const planets = ref(null);
-    const loading = ref(false);
+    const loading = ref(true);
     const planetCount = ref(0);
     const resultsPerPage = ref(10);
-    
-    loading.value = true;
 
     //allPlanets = getPlanets('https://swapi.dev/api/planets', []);
     fetch('https://swapi.dev/api/planets')
@@ -43,7 +41,6 @@
                             allPlanets.results = allPlanets.results.concat(page.results);
                             planetCount.value = allPlanets.results.length;
                         });
-                        console.log(allPlanets);
                         planets.value = allPlanets.results;
                         loading.value = false;
                     });
@@ -53,7 +50,7 @@
 
     <template>
         <div v-if="loading">
-            <v-progress-linear indeterminate></v-progress-linear>
+            <v-progress-linear indeterminate color="yellow"></v-progress-linear>
         </div>
         <v-data-table
             v-else-if="planets"
