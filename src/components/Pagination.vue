@@ -29,7 +29,9 @@
 </script>
 
 <template>
-    <div>{{ current }} / {{ total }}</div>
-    <div @click="prev">Prev</div>
-    <div @click="next">Next</div>
+    <div class="d-flex align-center justify-end">
+        <v-btn text="Prev" @click="prev"></v-btn>
+        <div class="mx-2">{{ current }} / {{ total }}</div>
+        <v-btn text="Next" @click="next"></v-btn>
+    </div>
 </template>

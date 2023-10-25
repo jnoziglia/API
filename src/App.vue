@@ -3,13 +3,14 @@ import PlanetsList from './components/PlanetsList.vue'
 </script>
 
 <template>
-  <header>
-    <div class="text-h1 text-yellow">API</div>
-    <div class="text-subtitle-1">Accurate Planetary Information</div>
-  </header>
-  <main>
-    <PlanetsList />
-  </main>
+    <header>
+      <div class="text-h1 text-yellow">API</div>
+      <div class="text-subtitle-1">Accurate Planetary Information</div>
+    </header>
+    <main>
+      <PlanetsList />
+    </main>
+  
 </template>
 
 <style scoped>
